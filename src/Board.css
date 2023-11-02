@@ -1,3 +1,7 @@
 .Board {
   margin: 0 auto;
 }
+
+.board-win-tag {
+  color: white;
+}

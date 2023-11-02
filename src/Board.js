@@ -27,16 +27,16 @@ import "./Board.css";
  *
  **/
 
-function Board({ nrows=4, ncols=4, chanceLightStartsOn=.85 }) {
+function Board({ nrows = 2, ncols = 2, chanceLightStartsOn = .85 }) {
   const [board, setBoard] = useState(createBoard());
 
   /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
   function createBoard() {
     let initialBoard = [];
 
-    for (let rowsIdx = 0; rowsIdx < ncols; rowsIdx++) {
+    for (let rowsIdx = 0; rowsIdx < nrows; rowsIdx++) {
       let row = [];
-      for (let colsIdx = 0; colsIdx < nrows; colsIdx++) {
+      for (let colsIdx = 0; colsIdx < ncols; colsIdx++) {
         row.push(Math.random() > chanceLightStartsOn ? false : true);
       }
       initialBoard.push(row);
@@ -51,8 +51,9 @@ function Board({ nrows=4, ncols=4, chanceLightStartsOn=.85 }) {
     }
     return true;
   }
-
+  //TODO: DocString
   function flipCellsAround(coord) {
+    console.log(coord);
     setBoard(oldBoard => {
       const [y, x] = coord.split("-").map(Number);
 
@@ -64,21 +65,33 @@ function Board({ nrows=4, ncols=4, chanceLightStartsOn=.85 }) {
         }
       };
 
-      const boardCopy = [...oldBoard];
+      //const boardCopy = JSON.parse(JSON.stringify(oldBoard));
+      const boardCopy = oldBoard.map(row => [...row]);
 
       flipCell(y, x, boardCopy);
+      flipCell(y, x + 1, boardCopy);
+      flipCell(y + 1, x, boardCopy);
+      flipCell(y, x - 1, boardCopy);
+      flipCell(y - 1, x, boardCopy);
 
       return boardCopy;
     });
   }
 
   // if the game is won, just show a winning msg & render nothing else
-  if (hasWon()) return <h2>You won!</h2>;
+  if (hasWon()) return <h2 className="board-win-tag">You won!</h2>;
 
-  let display = board.map(row => row.map(cell => <Cell isLit={cell} />));
-  display = display.map(row => <tr>{row}</tr>);
+  let display = board.map(
+    (row, rIdx) => row.map(
+      (cell, cIdx) => (
+        <Cell
+          isLit={cell}
+          flipCellsAroundMe={() => flipCellsAround(`${ rIdx }-${ cIdx }`)}
+          key={`${ rIdx }-${ cIdx }`}
+        />)));
+  display = display.map((row, idx) => <tr key={idx}>{row}</tr>);
 
-  console.log("board to display,",display);
+  // console.log("board to display,", display);
 
   return <table><tbody>{display}</tbody></table>;
 
